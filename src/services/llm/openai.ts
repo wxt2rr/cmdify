@@ -2,20 +2,20 @@ import OpenAI from 'openai';
 import { BaseLLMProvider } from './base.js';
 import { LLMRequest, LLMResponse } from '../../types/index.js';
 
-// 从内容中提取 JSON，处理可能的 markdown 代码块
+// Extract JSON from content, handle possible markdown code blocks
 function extractJSON(content: string): any {
   content = content.trim();
 
-  // 尝试直接解析
+  // Try to parse directly
   try {
     return JSON.parse(content);
   } catch (e) {
-    // 不是纯 JSON，继续尝试其他格式
+    // Not pure JSON, try other formats
   }
 
-  // 尝试提取 markdown 代码块中的 JSON
-  // 格式 1: ```json\n{...}\n```
-  // 格式 2: ```\n{...}\n```
+  // Try to extract JSON from markdown code blocks
+  // Format 1: ```json\n{...}\n```
+  // Format 2: ```\n{...}\n```
   const jsonBlockRegex = /```(?:json)?\s*([\s\S]*?)\s*```/is;
   const match = content.match(jsonBlockRegex);
 
@@ -23,11 +23,11 @@ function extractJSON(content: string): any {
     try {
       return JSON.parse(match[1].trim());
     } catch (e) {
-      // 解析失败
+      // Parse failed
     }
   }
 
-  // 尝试提取花括号内的内容
+  // Try to extract content within braces
   const braceRegex = /\{[\s\S]*\}/;
   const braceMatch = content.match(braceRegex);
 
@@ -35,12 +35,12 @@ function extractJSON(content: string): any {
     try {
       return JSON.parse(braceMatch[0]);
     } catch (e) {
-      // 解析失败
+      // Parse failed
     }
   }
 
-  // 都失败了，抛出错误
-  throw new Error(`无法解析 JSON: ${content.substring(0, 100)}...`);
+  // All failed, throw error
+  throw new Error(`Failed to parse JSON: ${content.substring(0, 100)}...`);
 }
 
 export class OpenAIProvider extends BaseLLMProvider {
@@ -77,17 +77,17 @@ export class OpenAIProvider extends BaseLLMProvider {
         return { commands: [] };
       }
 
-      // 使用提取函数解析 JSON
+      // Use extract function to parse JSON
       const response = extractJSON(content) as LLMResponse;
 
-      // 标记第一个命令为推荐
+      // Mark first command as recommended
       if (response.commands && response.commands.length > 0) {
         response.commands[0].isRecommended = true;
       }
 
       return response;
     } catch (error) {
-      console.error('OpenAI API 调用失败:', error);
+      console.error('OpenAI API call failed:', error);
       throw error;
     }
   }

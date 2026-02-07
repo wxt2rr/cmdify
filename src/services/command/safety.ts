@@ -31,7 +31,7 @@ export async function confirmExecution(command: string): Promise<boolean> {
   }
 
   if (isDangerousCommand(command)) {
-    return false; // 危险命令需要单独处理
+    return false; // Dangerous commands need separate handling
   }
 
   return true;

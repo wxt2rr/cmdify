@@ -1,7 +1,7 @@
 {
   "name": "cmdify",
   "version": "1.0.0",
-  "description": "AI 命令助手 - 用自然语言生成 Shell 命令",
+  "description": "AI Command Assistant - Generate Shell commands using natural language",
   "main": "dist/index.js",
   "bin": {
     "cmdify": "./bin/cmdify",

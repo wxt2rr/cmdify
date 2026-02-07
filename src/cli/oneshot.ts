@@ -34,25 +34,25 @@ export async function oneshotMode(
     const commands = await generateCommands(query, options);
 
     if (commands.length === 0) {
-      console.log('未生成任何命令');
+      console.log('No commands generated');
       return;
     }
 
     printCommands(commands);
 
-    // 只生成模式，不执行
+    // Generate only mode, don't execute
     if (options.noExec) {
       return;
     }
 
-    // 获取要执行的命令
+    // Get command to execute
     let command: Command;
 
     if (options.yes) {
-      // 自动执行推荐的命令（第一个）
+      // Auto-execute recommended command (first one)
       command = commands[0];
     } else {
-      // 需要用户选择
+      // Need user selection
       const readline = await import('node:readline');
       const rl = readline.createInterface({
         input: process.stdin,
@@ -61,7 +61,7 @@ export async function oneshotMode(
 
       const answer = await new Promise<string>((resolve) => {
         rl.question(
-          `请选择 [1-${commands.length}, q=退出]: `,
+          `Select [1-${commands.length}, q=quit]: `,
           (answer) => {
             rl.close();
             resolve(answer.trim());
@@ -76,22 +76,22 @@ export async function oneshotMode(
       const index = parseInt(answer) - 1;
 
       if (isNaN(index) || index < 0 || index >= commands.length) {
-        console.log('无效的选择');
+        console.log('Invalid selection');
         return;
       }
 
       command = commands[index];
     }
 
-    // 安全检查
+    // Safety check
     if (isDangerousCommand(command.command)) {
       printWarning(
-        '⚠️  危险命令: ' + command.command + '，请确认后执行',
+        '⚠️  DANGER: ' + command.command + ', please confirm before executing',
       );
-      const confirmed = await confirm('确认执行');
+      const confirmed = await confirm('Confirm execution');
 
       if (!confirmed) {
-        console.log('已取消执行');
+        console.log('Execution cancelled');
         return;
       }
     } else {
@@ -100,10 +100,10 @@ export async function oneshotMode(
         printWarning(warning);
       }
 
-      const confirmed = await confirm('确认执行');
+      const confirmed = await confirm('Confirm execution');
 
       if (!confirmed) {
-        console.log('已取消执行');
+        console.log('Execution cancelled');
         return;
       }
     }

@@ -26,7 +26,7 @@ const DEFAULT_CONFIG: Config = {
   },
 };
 
-// 配置文件搜索路径
+// Config file search path
 const CONFIG_FILE_PATH = path.join(os.homedir(), '.cmdify', 'config.json');
 
 class ConfigService {
@@ -37,12 +37,12 @@ class ConfigService {
       return this.config!;
     }
 
-    // cosmiconfig 默认搜索顺序：
-    // 1. package.json 中的属性
-    // 2. .cmdifyrc 文件
-    // 3. .cmdifyrc.json 等文件
-    // 4. .config/.cmdifyrc 等文件
-    // 5. cmdify.config.js 等
+    // cosmiconfig default search order:
+    // 1. Properties in package.json
+    // 2. .cmdifyrc file
+    // 3. .cmdifyrc.json etc.
+    // 4. .config/.cmdifyrc etc.
+    // 5. cmdify.config.js etc.
     const explorer = cosmiconfig('cmdify');
 
     const result = await explorer.search();
@@ -50,7 +50,7 @@ class ConfigService {
     if (result) {
       this.config = { ...DEFAULT_CONFIG, ...result.config };
     } else {
-      // 如果默认搜索没找到，尝试读取 ~/.cmdify/config.json
+      // If default search fails, try to read ~/.cmdify/config.json
       this.config = await this.loadFromFile();
     }
 
@@ -65,7 +65,7 @@ class ConfigService {
       const userConfig = JSON.parse(content);
       return { ...DEFAULT_CONFIG, ...userConfig };
     } catch (error) {
-      // 文件不存在或解析失败，返回默认配置
+      // File doesn't exist or parse failed, return default config
       return DEFAULT_CONFIG;
     }
   }

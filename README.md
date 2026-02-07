@@ -1,79 +1,80 @@
-# Cmdify - AI 命令助手
+# Cmdify - AI Command Assistant
 
-用自然语言生成 Shell 命令的 CLI 工具。
+A CLI tool that generates Shell commands using natural language.
 
-## 功能特性
+## Features
 
-- 🤖 **AI 驱动**：通过自然语言描述，自动生成对应的 Shell 命令
-- 🔒 **安全检查**：自动检测危险命令（如 `rm -rf`），需要二次确认
-- 📋 **多选项推荐**：返回 1-3 个候选命令供选择
-- ⚡ **多种使用模式**：支持交互模式、一键模式、仅生成模式
-- ⚙️ **灵活配置**：支持配置文件和环境变量
+- 🤖 **AI-Powered**: Automatically generates Shell commands from natural language descriptions
+- 🔒 **Safety Checks**: Automatically detects dangerous commands (like `rm -rf`) and requires confirmation
+- 📋 **Multiple Options**: Returns 1-3 candidate commands for selection
+- ⚡ **Multiple Modes**: Supports interactive mode, one-shot mode, and generate-only mode
+- ⚙️ **Flexible Config**: Supports configuration files and environment variables
+- 📜 **Command History**: View, search, and navigate through command history with pagination
 
-## 安装
+## Installation
 
-### 方法一：全局安装（推荐）
+### Method 1: Global Installation (Recommended)
 
 ```bash
 cd /path/to/cmdify
 npm install -g .
 ```
 
-### 方法二：从 npm 安装
+### Method 2: Install from npm
 
 ```bash
 npm install -g cmdify
 ```
 
-### 方法三：使用 npm link（开发时方便）
+### Method 3: Using npm link (for development)
 
 ```bash
 cd /path/to/cmdify
 npm link
 
-# 使用时直接运行
+# Run directly
 cmdify
 ```
 
-### 方法四：直接运行（本地开发）
+### Method 4: Run directly (local development)
 
 ```bash
 cd /path/to/cmdify
 
-# 运行
+# Run
 npm run dev
 
-# 或者
+# Or
 npm run build
 node dist/index.js
 ```
 
-### 验证安装
+### Verify Installation
 
 ```bash
-# 检查是否安装成功
+# Check if installed successfully
 which cmdify
 
-# 显示帮助信息
+# Show help information
 cmdify --help
 ```
 
-## 配置
+## Configuration
 
-### 方法一：环境变量（推荐）
+### Method 1: Environment Variable (Recommended)
 
 ```bash
-# 临时设置
+# Temporary setting
 export OPENAI_API_KEY=your_api_key_here
 
-# 永久保存到 ~/.zshrc（zsh）或 ~/.bashrc（bash）
+# Permanently save to ~/.zshrc (zsh) or ~/.bashrc (bash)
 echo 'export OPENAI_API_KEY=your_api_key_here' >> ~/.zshrc
 source ~/.zshrc
 ```
 
-### 方法二：配置文件
+### Method 2: Configuration File
 
-在 `~/.cmdify/config.json` 中配置：
+Configure in `~/.cmdify/config.json`:
 
 ```bash
 mkdir -p ~/.cmdify
@@ -99,211 +100,212 @@ cat > ~/.cmdify/config.json << 'EOF'
 EOF
 ```
 
-## 使用方法
+## Usage
 
-### 交互模式
+### Interactive Mode
 
-直接运行 `cmdify` 进入交互模式：
+Run `cmdify` directly to enter interactive mode:
 
 ```bash
 $ cmdify
 
-🤖 Cmdify - AI 命令助手
+🤖 Cmdify - AI Command Assistant
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-请输入你想执行的操作 (Ctrl+C 退出): 查看占用 8080 端口的进程
+Enter your request (Ctrl+C to exit): check processes using port 8080
 
-⏳ 正在生成命令...
+⏳ Generating commands...
 
-📋 生成的命令:
+📋 Generated commands:
 
-[1] lsof -i :8080    ⭐ 推荐
-    查看指定端口占用情况
+[1] lsof -i :8080    ⭐ Recommended
+    Check specified port usage
 
 [2] netstat -tulnp | grep 8080
-    使用 netstat 查看端口
+    Use netstat to check port
 
 [3] ss -tululnp | grep 8080
-    使用 ss 命令查看端口
+    Use ss command to check port
 
-请选择 [1-3, c=复制, r=重新生成, q=退出]: 1
+Select [1-3, c=copy, r=regen, q=quit]: 1
 
-✅ 执行: lsof -i :8080
+✅ Executing: lsof -i :8080
 
 COMMAND   PID   USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
 node    12345  user   24u  IPv4  ...    0t0  TCP *:8080
 ```
 
-### 一键模式
+### One-Shot Mode
 
-自动执行推荐的命令（第一个）：
+Auto-execute the recommended command (first one):
 
 ```bash
-$ cmdify -y 启动所有 docker 容器
+$ cmdify -y start all docker containers
 
-⏳ 正在生成命令...
+⏳ Generating commands...
 
-✅ 执行: docker start $(docker ps -a -q)
+✅ Executing: docker start $(docker ps -a -q)
 ```
 
-### 仅生成模式
+### Generate-Only Mode
 
-只生成命令，不执行：
+Generate commands only, without execution:
 
 ```bash
-$ cmdify -n 查看系统内存使用情况
+$ cmdify -n check system memory usage
 
-⏳ 正在生成命令...
+⏳ Generating commands...
 
-📋 生成的命令:
+📋 Generated commands:
 
 [1] free -h
-    查看系统内存使用情况    ⭐ 推荐
+    Check system memory usage    ⭐ Recommended
 
 [2] vmstat -s
-    使用 vmstat 查看内存统计
+    Use vmstat to view memory stats
 ```
 
-## 命令选项
+## Command Options
 
-| 选项 | 说明 |
-|------|------|
-| `-y, --yes` | 自动执行推荐命令，无需确认 |
-| `-n, --no-exec` | 只生成命令，不执行 |
-| `-c, --copy` | 复制命令到剪贴板 |
-| `-p, --provider <name>` | LLM 提供商 (默认: openai) |
-| `-m, --model <name>` | 指定模型 |
-| `-h, --help` | 显示帮助信息 |
-| `-V, --version` | 显示版本号 |
+| Option | Description |
+|---------|-------------|
+| `-y, --yes` | Auto-execute recommended command without confirmation |
+| `-n, --no-exec` | Generate commands only, don't execute |
+| `-c, --copy` | Copy command to clipboard |
+| `-p, --provider <name>` | LLM provider (default: openai) |
+| `-m, --model <name>` | Specify model |
+| `-h, --help` | Display help information |
+| `-V, --version` | Display version number |
 
-## 历史记录
+## Command History
 
-### 查看历史
+### View History
 
 ```bash
 $ cmdify history
-# 或使用别名
+# Or using alias
 $ cf his
 ```
 
-### 搜索历史
+### Search History
 
 ```bash
 $ cmdify history -s keyword
-# 或
+# Or
 $ cf his -s keyword
 ```
 
-### 打开历史文件
+### Open History File
 
 ```bash
-$ cmdify history -open
-# 或
-$ cf his -open
+$ cmdify history -o
+# Or
+$ cf his -o
 ```
 
-### 历史导航
+### History Navigation
 
-使用键盘导航历史记录：
+Use keyboard to navigate through history records:
 
-- `↑/↓` 或 `k/j` - 上下选择条目
-- `←/→` 或 `h/l` 或 `n/p` - 翻页
-- `Enter` - 执行选中的命令
-- `q` 或 `ESC` - 退出
+- `↑/↓` or `k/j` - Select items up/down
+- `←/→` or `h/l` or `n/p` - Change pages
+- `Enter` - Execute selected command with confirmation
+- `q` or `ESC` - Quit
 
-选中的条目会显示 `→` 箭头标记。
+Selected items are marked with a `→` arrow.
 
-历史记录保存在 `~/.cmdify/history.txt`
+History is saved in `~/.cmdify/history.txt`
 
-## 使用示例
+## Usage Examples
 
-### 查询端口占用
+### Check Port Usage
 
 ```bash
-$ cmdify 查看占用 8080 端口的进程
+$ cmdify check process using port 8080
 ```
 
-### Docker 操作
+### Docker Operations
 
 ```bash
-$ cmdify 启动所有停止的 docker 容器
-$ cmdify 查看所有 docker 镜像
-$ cmdify 停止所有 docker 容器
+$ cmdify start all stopped docker containers
+$ cmdify view all docker images
+$ cmdify stop all docker containers
 ```
 
-### 系统监控
+### System Monitoring
 
 ```bash
-$ cmdify 查看系统 CPU 使用情况
-$ cmdify 查看系统内存使用情况
-$ cmdify 查看磁盘使用情况
+$ cmdify check system CPU usage
+$ cmdify check system memory usage
+$ cmdify check disk usage
 ```
 
-### 进程管理
+### Process Management
 
 ```bash
-$ cmdify 查看 node 相关的进程
-$ cmdify 杀掉占用 8080 端口的进程
+$ cmdify view node related processes
+$ cmdify kill process using port 8080
 ```
 
-### 网络操作
+### Network Operations
 
 ```bash
-$ cmdify 测试 google.com 的连接
-$ cmdify 查看本机 IP 地址
-$ cmdify 查看所有监听的端口
+$ cmdify test connection to google.com
+$ cmdify view local IP address
+$ cmdify view all listening ports
 ```
 
-## 开发
+## Development
 
-### 运行开发模式
+### Run Development Mode
 
 ```bash
 npm run dev
 ```
 
-### 构建
+### Build
 
 ```bash
 npm run build
 ```
 
-### 运行测试
+### Run Tests
 
 ```bash
 npm test
 ```
 
-## 项目结构
+## Project Structure
 
 ```
 cmdify/
 ├── src/
-│   ├── cli/              # CLI 命令处理
-│   │   ├── index.ts      # CLI 入口
-│   │   ├── interactive.ts # 交互模式
-│   │   └── oneshot.ts    # 一键模式
-│   ├── services/          # 业务逻辑
-│   │   ├── llm/          # LLM 服务
-│   │   ├── command/       # 命令处理
-│   │   └── config/       # 配置管理
-│   ├── ui/               # UI 显示
-│   └── types/            # TypeScript 类型
+│   ├── cli/              # CLI command handling
+│   │   ├── index.ts      # CLI entry point
+│   │   ├── interactive.ts # Interactive mode
+│   │   ├── history.ts    # History command
+│   │   └── oneshot.ts    # One-shot mode
+│   ├── services/          # Business logic
+│   │   ├── llm/          # LLM service
+│   │   ├── command/       # Command handling
+│   │   └── config/       # Config management
+│   ├── ui/               # UI display
+│   └── types/            # TypeScript types
 ├── bin/
-│   └── cmdify             # 可执行文件
+│   └── cmdify             # Executable file
 ├── prompts/
-│   └── system.txt        # LLM 系统提示词
+│   └── system.txt        # LLM system prompt
 └── package.json
 ```
 
-## 技术栈
+## Tech Stack
 
-- **Node.js + TypeScript** - 运行时和类型系统
-- **commander** - CLI 框架
+- **Node.js + TypeScript** - Runtime and type system
+- **commander** - CLI framework
 - **openai** - OpenAI API SDK
-- **chalk** - 终端彩色输出
-- **execa** - 命令执行
-- **cosmiconfig** - 配置文件管理
+- **chalk** - Terminal colored output
+- **execa** - Command execution
+- **cosmiconfig** - Config file management
 
 ## License
 

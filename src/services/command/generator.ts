@@ -11,7 +11,7 @@ export async function generateCommands(
   const apiKey = configService.getApiKey();
 
   if (!apiKey) {
-    throw new Error('未配置 API Key，请设置 OPENAI_API_KEY 环境变量或在配置文件中设置');
+    throw new Error('API Key not configured, please set OPENAI_API_KEY environment variable or configure in config file');
   }
 
   const request: LLMRequest = {

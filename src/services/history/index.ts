@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import readline from 'node:readline';
+import { exec } from 'node:child_process';
 
 const HISTORY_DIR = path.join(os.homedir(), '.cmdify');
 const HISTORY_FILE = path.join(HISTORY_DIR, 'history.txt');
@@ -128,103 +129,122 @@ class HistoryService {
       }
     };
 
-    (readline as any).emitKeypressEvents = true;
+    readline.emitKeypressEvents(process.stdin);
 
     this.render(entries, page, selectedIndex);
 
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-      terminal: true,
-    });
-
     process.stdin.setRawMode(true);
+    process.stdin.resume();
+
+    let buffer: string[] = [];
+    let escTimer: NodeJS.Timeout | null = null;
 
     await new Promise<void>(resolve => {
-      const handleKey = (
-        str: string,
-        key: { name: string; ctrl: boolean; meta: boolean; shift: boolean; sequence?: string }
-      ): void => {
-        if (key.ctrl && key.name === 'c') {
-          process.stdin.setRawMode(false);
-          rl.close();
-          resolve();
+      const cleanup = (): void => {
+        if (escTimer) clearTimeout(escTimer);
+        process.stdin.setRawMode(false);
+        process.stdin.pause();
+        process.stdin.removeListener('keypress', handleKeypress);
+        resolve();
+      };
+
+      const handleKeypress = (str: string, key: any): void => {
+        if (key && key.name === 'c' && key.ctrl) {
+          cleanup();
           return;
         }
 
-        if (key.name === 'q') {
-          process.stdin.setRawMode(false);
-          rl.close();
-          resolve();
-          return;
-        }
+        // For direction keys, we need to handle the escape sequence
+        const seq = str + (key?.sequence || '');
 
-        if (key.name === 'return') {
+        if (seq === '\x1b[A' || key?.name === 'up') {
+          updateSelection(-1);
+          this.render(entries, page, selectedIndex);
+        } else if (seq === '\x1b[B' || key?.name === 'down') {
+          updateSelection(1);
+          this.render(entries, page, selectedIndex);
+        } else if (seq === '\x1b[D' || key?.name === 'left') {
+          const oldPage = page;
+          changePage(-1);
+          if (page !== oldPage) {
+            selectedIndex = 0;
+            this.render(entries, page, selectedIndex);
+          }
+        } else if (seq === '\x1b[C' || key?.name === 'right') {
+          const oldPage = page;
+          changePage(1);
+          if (page !== oldPage) {
+            selectedIndex = 0;
+            this.render(entries, page, selectedIndex);
+          }
+        } else if (str === 'q') {
+          process.stdin.setRawMode(false);
+          cleanup();
+        } else if (key?.name === 'return') {
           const startIndex = (page - 1) * PAGE_SIZE;
           const endIndex = Math.min(startIndex + PAGE_SIZE, entries.length);
           const pageEntries = entries.slice(startIndex, endIndex);
 
           if (selectedIndex < pageEntries.length) {
             const command = pageEntries[selectedIndex].command;
+            // Remove keypress listener before showing confirmation
+            process.stdin.removeListener('keypress', handleKeypress);
             process.stdin.setRawMode(false);
-            rl.close();
-            console.log();
-            if (onExecute) {
-              onExecute(command);
-            }
-            resolve();
-          }
-          return;
-        }
+            console.log(`\nExecute: ${command}`);
 
-        if (key.name === 'up' || key.sequence === '\x1b[A') {
-          updateSelection(-1);
-          this.render(entries, page, selectedIndex);
-        } else if (key.name === 'down' || key.sequence === '\x1b[B') {
+            const rlConfirm = readline.createInterface({
+              input: process.stdin,
+              output: process.stdout,
+            });
+
+            rlConfirm.question('Confirm? (y/n): ', (answer) => {
+              rlConfirm.close();
+              if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
+                console.log(`Executing: ${command}`);
+                exec(command, (error: any, stdout: string, stderr: string) => {
+                  if (stdout) console.log(stdout);
+                  if (stderr) console.error(stderr);
+                  if (error) {
+                    console.error(`Error: ${error.message}`);
+                  }
+                });
+              } else {
+                console.log('Cancelled');
+              }
+              resolve();
+            });
+          } else {
+            // No selection, just cleanup
+            process.stdin.setRawMode(false);
+            cleanup();
+          }
+        } else if (str === 'j') {
           updateSelection(1);
           this.render(entries, page, selectedIndex);
-        } else if (key.name === 'left' || key.sequence === '\x1b[D') {
+        } else if (str === 'k') {
+          updateSelection(-1);
+          this.render(entries, page, selectedIndex);
+        } else if (str === 'h' || str === 'p') {
           const oldPage = page;
           changePage(-1);
           if (page !== oldPage) {
             selectedIndex = 0;
             this.render(entries, page, selectedIndex);
           }
-        } else if (key.name === 'right' || key.sequence === '\x1b[C') {
+        } else if (str === 'l' || str === 'n') {
           const oldPage = page;
           changePage(1);
           if (page !== oldPage) {
             selectedIndex = 0;
             this.render(entries, page, selectedIndex);
           }
-        } else if (key.name === 'k') {
-          updateSelection(-1);
-          this.render(entries, page, selectedIndex);
-        } else if (key.name === 'j') {
-          updateSelection(1);
-          this.render(entries, page, selectedIndex);
-        } else if (key.name === 'h' || key.name === 'p') {
-          const oldPage = page;
-          changePage(-1);
-          if (page !== oldPage) {
-            selectedIndex = 0;
-            this.render(entries, page, selectedIndex);
-          }
-        } else if (key.name === 'l' || key.name === 'n') {
-          const oldPage = page;
-          changePage(1);
-          if (page !== oldPage) {
-            selectedIndex = 0;
-            this.render(entries, page, selectedIndex);
-          }
-        } else if (key.name === 'escape') {
+        } else if (key?.name === 'escape') {
           process.stdin.setRawMode(false);
-          rl.close();
-          resolve();
+          cleanup();
         }
       };
 
-      rl.on('keypress', handleKey);
+      process.stdin.on('keypress', handleKeypress);
     });
   }
 

@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import { historyService } from '../history/index.js';
 
 export async function executeCommand(command: string, input?: string): Promise<void> {
-  console.log(chalk.yellow('✅ 执行:'), command);
+  console.log(chalk.yellow('✅ Executing:'), command);
   console.log();
 
   try {
@@ -14,13 +14,13 @@ export async function executeCommand(command: string, input?: string): Promise<v
     historyService.add(command, input);
 
     if (exitCode !== 0) {
-      console.error(chalk.red(`命令执行失败，退出码: ${exitCode}`));
+      console.error(chalk.red(`Command failed, exit code: ${exitCode}`));
     }
   } catch (error: any) {
-    console.error(chalk.red('命令执行失败:'), error.message);
+    console.error(chalk.red('Command failed:'), error.message);
 
     if (error.exitCode !== undefined) {
-      console.error(chalk.red(`退出码: ${error.exitCode}`));
+      console.error(chalk.red(`Exit code: ${error.exitCode}`));
     }
   }
 }
