@@ -1,5 +1,7 @@
 # Cmdify - AI 命令助手
 
+**[English](README.md)** | **[中文](README.zh.md)**
+
 用自然语言生成 Shell 命令的 CLI 工具。
 
 ## 功能特性

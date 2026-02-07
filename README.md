@@ -1,5 +1,7 @@
 # Cmdify - AI Command Assistant
 
+**[English](README.md)** | **[中文](README.zh.md)**
+
 A CLI tool that generates Shell commands using natural language.
 
 ## Features

@@ -180,7 +180,7 @@ $ wxt -n 查看占用 8080 端口的进程
 
 ### 3.4 命令选项
 
-```bash命令
+```bash
 $ wxt --help
 
 Usage: wxt [options] [query]
@@ -565,7 +565,7 @@ export interface LLMProvider {
     "start": "node dist/index.js"
   }
 }
-```
+`````
 
 ### 10.2 安装使用
 
